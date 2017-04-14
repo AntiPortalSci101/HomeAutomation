@@ -63,22 +63,26 @@ Adafruit_MQTT_Subscribe TVChannelUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAM
 Adafruit_MQTT_Subscribe TVChannelDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelDOWN");
 Adafruit_MQTT_Subscribe TVVolumeUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeUP");
 Adafruit_MQTT_Subscribe TVVolumeDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeDOWN");
+Adafruit_MQTT_Subscribe TVMUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVMUTE");
 
 //NOTE TO SELF: TRY TO REPLACE THE VOLUME AND CHANNEL UPDOWN WITH A SLIDER USING PROTOCOLS IN FOLDER
 //IN and PUBLISHING feed arrays
-#define numSubscriptions 7
-Adafruit_MQTT_Subscribe inArray[numSubscriptions] = {LEDToggle, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN };
+#define numSubscriptions 8
+Adafruit_MQTT_Subscribe inArray[numSubscriptions] = {LEDToggle, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE };
 /*************************** Hardware shit ************************************/
-struct light{
-  Adafruit_MQTT_Subscribe feed;
-  int pin;
-} light1 = {.feed = LEDToggle, .pin=2}, light2={.feed=LED2,.pin=5};
-struct light lights[2] = { light1,light2 };//pairings of led feeds and the pin that the light is on
-
+/*
+ * 
+     struct light{
+      Adafruit_MQTT_Subscribe feed;
+      int pin;
+    } light1 = {.feed = LEDToggle, .pin=2}, light2={.feed=LED2,.pin=5};
+    struct light lights[2] = { light1,light2 };//pairings of led feeds and the pin that the light is on
+*/
 /*************************** Sketch Code ************************************/
 
 void setup() {
   //Serial.begin(115200); WTF???
+  Wire.begin();
   Serial.begin(9600);
   Serial.println(F("Adafruit MQTT demo"));
 
@@ -92,8 +96,8 @@ void setup() {
   for(int i=0; i<numSubscriptions; i++) mqtt.subscribe(&inArray[i]);//the i terminator should match num of in feeds
 
 //setting input and output pins
-for(int i=0; i< (sizeof(lights)/ sizeof(struct light)); i++){pinMode(lights[i].pin , OUTPUT);}
-}
+//for(int i=0; i< (sizeof(lights)/ sizeof(struct light)); i++){pinMode(lights[i].pin , OUTPUT);}
+}//setup
 
 uint32_t x=0;
 
@@ -104,7 +108,7 @@ void loop() {//do we need "io.run()"? not sure, see servo skectch, but if it ain
   MQTT_connect();
 //CONSIDER USING EVENT HANDLERS AS OUTLINED IN "adafrutio_16_servo.ino" example instead of the hodgepoge below
  for(int i=0;i<numSubscriptions; i++) {refreshData(); Serial.print("Feed : "); Serial.println((char*)inArray[i].lastread);}//look for packets on all subscription feeds
-  act();//this is where everything happens
+  sendData();//this is where everything happens
 
   // ping the server to keep the mqtt connection alive
   if(! mqtt.ping()) {
@@ -151,6 +155,15 @@ void refreshData(){
   }//while */
 }//refreshData
 
-void act() {
- ;
-  }
+void sendData() {
+  //LEDToggle, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE
+   Wire.beginTransmission(8);
+   sendByByte(*LEDToggle.lastread == 1 ? "l0h":"l0l");//LEDToggle (aka LED 0)
+   //INSERT AN LED1
+   sendByByte(*LED2.lastread == 1 ? "l2h":"l2l");
+   sendByByte(*TVPower.lastread == 1 ? "t0p":"");
+   sendByByte(*TVChannelUP.lastread == 1 ? "t0c":"");
+   Wire.endTransmission(); 
+  }//
+
+void sendByByte(String s){if(s[0]!='\0') for(int i=0;i<s.length();i++){Wire.write((char) s[i]);};}
