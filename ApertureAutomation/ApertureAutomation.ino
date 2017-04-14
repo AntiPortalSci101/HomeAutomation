@@ -107,7 +107,7 @@ void loop() {//do we need "io.run()"? not sure, see servo skectch, but if it ain
   // function definition further below.
   MQTT_connect();
 //CONSIDER USING EVENT HANDLERS AS OUTLINED IN "adafrutio_16_servo.ino" example instead of the hodgepoge below
- for(int i=0;i<numSubscriptions; i++) {refreshData(); Serial.print("Feed : "); Serial.println((char*)inArray[i].lastread);}//look for packets on all subscription feeds
+ for(int i=0;i<numSubscriptions; i++) {refreshData(); Serial.print("Feed "+i); Serial.println((char*)inArray[i].lastread);}//look for packets on all subscription feeds
   sendData();//this is where everything happens
 
   // ping the server to keep the mqtt connection alive
@@ -127,15 +127,15 @@ void MQTT_connect() {
     return;
   }
 
-  Serial.print("Connecting to MQTT... ");
+  Serial.print(F("Connecting to MQTT... "));
 
   while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
        Serial.println(mqtt.connectErrorString(ret));
-       Serial.println("Retrying MQTT connection in 5 seconds...");
+       Serial.println(F("Retrying MQTT connection in 5 seconds..."));
        mqtt.disconnect();
        delay(5000);  // wait 5 seconds
   }
-  Serial.println("MQTT Connected!");
+  Serial.println(F("MQTT Connected!"));
 }
 
 //GET DATA FROM ALL FEED AND PUT THEM INTO THE 'lastread' vals of the suscription objects
@@ -160,7 +160,7 @@ void sendData() {
    Wire.beginTransmission(8);
    sendByByte(*LEDToggle.lastread == 1 ? "l0h":"l0l");//LEDToggle (aka LED 0)
    //INSERT AN LED1
-   sendByByte(*LED2.lastread == 1 ? "l2h":"l2l");
+   sendByByte(*LED2.lastread == 1 ? "l2h":"l2l" );
    sendByByte(*TVPower.lastread == 1 ? "t0p":"");
    sendByByte(*TVChannelUP.lastread == 1 ? "t0c":"");
    Wire.endTransmission(); 
