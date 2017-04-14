@@ -1,3 +1,5 @@
+// ExecutorSlave module code for ApertureAutomation
+//Copyright under Aperture Science on April 13, 2017
 #include <Servo.h>
 
 #include <boarddefs.h>
@@ -6,9 +8,6 @@
 #include <IRremoteInt.h>
 
 #include <Wire.h>
-// ExecutorSlave module code for ApertureAutomation
-//Copyright under Aperture Science on April 13, 2017
-
 
 
 //***********************PARCEL*************************
@@ -38,7 +37,7 @@ void setup()
 {
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onReceive(receiveEvent); // register event
-  Serial.begin(9600);           // start serial for output
+  Serial.begin(9600);
   for(int i=0; i < sizeof(lights)/sizeof(int)) {pinMode(lights[i], OUTPUT); Serial.println("LED INITIALIZED");}
   for(int i=0; i < sizeof(servos)/sizeof(Servo)) {servos[i].attach(i+7); Serial.println("SERVO INITIALIZED");} //SERVOS WILL BE ON PINS 7,8,9, etc.
 }
