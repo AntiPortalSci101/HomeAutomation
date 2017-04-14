@@ -88,6 +88,9 @@ void execute(struct parcel p)
                        }//TV subswitch ending
      case 's' ://servo
               Serial.println("Setting servo to angle" + p.command[2]);
+              servos[p.command[1]].write(p.command[2]);
+              delay(15);
+              break;
 
      default: Serial.println("UNACCEPTABLE PARCEL");
                  
