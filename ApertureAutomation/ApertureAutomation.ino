@@ -48,7 +48,6 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 // You don't need to change anything below this line!
 #define halt(s) { Serial.println(F( s )); while(1);  }
 
-
 /****************************** Feeds ***************************************/
 
 // Setup a feed called 'photocell' for publishing.
@@ -56,7 +55,7 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 //Adafruit_MQTT_Publish photocell = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/photocell");
 
 // Subscribing to changes for command feeds
-Adafruit_MQTT_Subscribe LEDToggle = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LEDToggle");
+Adafruit_MQTT_Subscribe LED0 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED0");
 Adafruit_MQTT_Subscribe LED2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED2");
 Adafruit_MQTT_Subscribe TVPower = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPower");
 Adafruit_MQTT_Subscribe TVChannelUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelUP");
@@ -64,11 +63,12 @@ Adafruit_MQTT_Subscribe TVChannelDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERN
 Adafruit_MQTT_Subscribe TVVolumeUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeUP");
 Adafruit_MQTT_Subscribe TVVolumeDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeDOWN");
 Adafruit_MQTT_Subscribe TVMUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVMUTE");
+Adafruit_MQTT_Subscribe PetFeeder = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/PetFeeder"); //servo
 
 //NOTE TO SELF: TRY TO REPLACE THE VOLUME AND CHANNEL UPDOWN WITH A SLIDER USING PROTOCOLS IN FOLDER
 //IN and PUBLISHING feed arrays
 #define numSubscriptions 8
-Adafruit_MQTT_Subscribe inArray[numSubscriptions] = {LEDToggle, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE };
+Adafruit_MQTT_Subscribe inArray[numSubscriptions] = {LED0, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE };
 /*************************** Hardware shit ************************************/
 /*
  * 
@@ -158,11 +158,21 @@ void refreshData(){
 void sendData() {
   //LEDToggle, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE
    Wire.beginTransmission(8);
-   sendByByte(*LEDToggle.lastread == 1 ? "l0h":"l0l");//LEDToggle (aka LED 0)
+   //LEDs
+   sendByByte(*LED0.lastread == '1' ? "l0h":"l0l");//LED 0 high/low
    //INSERT AN LED1
-   sendByByte(*LED2.lastread == 1 ? "l2h":"l2l" );
-   sendByByte(*TVPower.lastread == 1 ? "t0p":"");
-   sendByByte(*TVChannelUP.lastread == 1 ? "t0c":"");
+   sendByByte(*LED2.lastread == '1' ? "l2h":"l2l" ); //led 2 high/low
+   //TVs
+   sendByByte(*TVPower.lastread == '1' ? "t0p":""); //tv 0 power
+   sendByByte(*TVChannelUP.lastread == '1' ? "t0c":""); //tv 0 channelUp
+   sendByByte(*TVChannelDOWN.lastread == '1' ? "t0b":""); //tv 0 channelDown
+   sendByByte(*TVVolumeUP.lastread == '1' ? "t0v":""); //tv 0 volumeUp
+   sendByByte(*TVVolumeDOWN.lastread == '1' ? "t0u":""); //tv 0 volumeDown
+   sendByByte(*TVMUTE.lastread == '1' ? "t0m":""); //tv 0 mute
+   //servo
+   sendByByte(*TVMUTE.lastread == '1' ? "t0m":""); //tv 0 mute
+   Wire.write('s'); Wire.write('0'); Wire.write(*PetFeeder.lastread);//lastread will be a 0 to 180 value
+   
    Wire.endTransmission(); 
   }//
 
