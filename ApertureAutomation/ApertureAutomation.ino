@@ -24,7 +24,7 @@
 byte mac[] = {0xCC, 0xAE, 0xBD, 0xFF, 0xFD, 0xDA}; //just some number that no other computer has
 
 //Uncomment the following, and set to a valid ip if you don't have dhcp available.
-IPAddress iotIP (192, 168, 0, 42);
+//IPAddress iotIP (192, 168, 0, 42);
 //Uncomment the following, and set to your preference if you don't have automatic dns.
 //IPAddress dnsIP (8, 8, 8, 8);
 //If you uncommented either of the above lines, make sure to change "Ethernet.begin(mac)" to "Ethernet.begin(mac, iotIP)" or "Ethernet.begin(mac, iotIP, dnsIP)"
@@ -67,8 +67,8 @@ Adafruit_MQTT_Subscribe PetFeeder = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME 
 
 //NOTE TO SELF: TRY TO REPLACE THE VOLUME AND CHANNEL UPDOWN WITH A SLIDER USING PROTOCOLS IN FOLDER
 //IN and PUBLISHING feed arrays
-#define numSubscriptions 8
-Adafruit_MQTT_Subscribe inArray[numSubscriptions] = {LED0, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE };
+//#define numSubscriptions 8
+Adafruit_MQTT_Subscribe inArray[8] = {LED0, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE };
 /*************************** Hardware shit ************************************/
 /*
  * 
@@ -88,12 +88,13 @@ void setup() {
 
   // Initialise the Client
   Serial.print(F("\nInit the Client..."));
-  if(Ethernet.begin(mac) == 0) Ethernet.begin(mac, iotIP);
+  if(Ethernet.begin(mac) == 0) Serial.print(F("Failed, have to use ip"));
+  //under the if: Ethernet.begin(mac, iotIP);
   
   delay(1000); //give the ethernet a second to initialize
   
 //SET UP SUBSCRIPTIONS TO READ FEEDS
-  for(int i=0; i<numSubscriptions; i++) mqtt.subscribe(&inArray[i]);//the i terminator should match num of in feeds
+  for(int i=0; i<(sizeof(inArray)/sizeof(Adafruit_MQTT_Subscribe)); i++) mqtt.subscribe(&inArray[i]);//the i terminator should match num of in feeds
 
 //setting input and output pins
 //for(int i=0; i< (sizeof(lights)/ sizeof(struct light)); i++){pinMode(lights[i].pin , OUTPUT);}
@@ -107,7 +108,7 @@ void loop() {//do we need "io.run()"? not sure, see servo skectch, but if it ain
   // function definition further below.
   MQTT_connect();
 //CONSIDER USING EVENT HANDLERS AS OUTLINED IN "adafrutio_16_servo.ino" example instead of the hodgepoge below
- for(int i=0;i<numSubscriptions; i++) {refreshData(); Serial.print("Feed "+i); Serial.println((char*)inArray[i].lastread);}//look for packets on all subscription feeds
+ for(int i=0;i<(sizeof(inArray)/sizeof(Adafruit_MQTT_Subscribe)); i++) {refreshData(); Serial.print("Feed "+i); Serial.println((char*)inArray[i].lastread);}//look for packets on all subscription feeds
   sendData();//this is where everything happens
 
   // ping the server to keep the mqtt connection alive
