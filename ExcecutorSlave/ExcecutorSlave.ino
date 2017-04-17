@@ -27,8 +27,8 @@ KEY */
 /*************************** Hardware shit ************************************/
 int lights[3] = {2,5,6};//pins. Position in array is the light's number, starting with light 0
 //consider slider for lights so that they can be dimmed
-Servo lock ,feeder;
-Servo servos[2] = {lock,feeder};
+Servo lock , petFeeder;
+//Servo servos[2] = {lock,feeder}; if we have more servos, we'll use array structure
 
 IRsend irSend; // irSend.sendSony(code,numberOfBits). The hex codes are in a txt file in this folder, and the #ofBits is the number of hex digits times 4
 //remember that sony makes you send the code thrice
@@ -90,14 +90,20 @@ void execute(struct parcel p)
                         default: Serial.println("unidentifyable tv command");
                        }//TV subswitch ending
      case 's' ://servo
-              Serial.println("Setting servo to angle" + p.command[2]);
-              servos[p.command[1]].write(p.command[2]);
-              delay(15);
+              Serial.println(F("Setting servo state") + p.command[2] == 'f'?"forward":"neutral");
+              //servos[p.command[1]].write(p.command[2]);
+              if(p.command[1]=='p') adjustServo(petFeeder,p.command[2]);
+              
               break;
 
-     default: Serial.println("UNACCEPTABLE PARCEL");
+     default: Serial.print("UNACCEPTABLE PARCEL: "); for(int(i=0;i<3;i++) {Serial.println(p.command[i]);} Serial.println();
                  
      }//switch
-                
-    
+                    
   }//execute
+
+void adjustServo(Servo s, char c)
+{
+  if(c=='f'){s.write(90);} else {s.write(90);}
+  delay(15);
+  }
