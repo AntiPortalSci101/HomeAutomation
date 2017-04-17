@@ -55,20 +55,25 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 //Adafruit_MQTT_Publish photocell = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/photocell");
 
 // Subscribing to changes for command feeds
-Adafruit_MQTT_Subscribe LED0 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED0");
-Adafruit_MQTT_Subscribe LED2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED2");
-Adafruit_MQTT_Subscribe TVPower = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPower");
-Adafruit_MQTT_Subscribe TVChannelUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelUP");
-Adafruit_MQTT_Subscribe TVChannelDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelDOWN");
-Adafruit_MQTT_Subscribe TVVolumeUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeUP");
-Adafruit_MQTT_Subscribe TVVolumeDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeDOWN");
-Adafruit_MQTT_Subscribe TVMUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVMUTE");
-Adafruit_MQTT_Subscribe PetFeeder = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/PetFeeder"); //servo
+Adafruit_MQTT_Subscribe Switcher = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/Switcher");
+
+Adafruit_MQTT_Subscribe LED0_1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED0_1");
+//Adafruit_MQTT_Subscribe LED2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED2");
+//Adafruit_MQTT_Subscribe TVPower = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPower");
+//Adafruit_MQTT_Subscribe TVChannelUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelUP");
+//Adafruit_MQTT_Subscribe TVChannelDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelDOWN");
+//Adafruit_MQTT_Subscribe TVVolumeUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeUP");
+//Adafruit_MQTT_Subscribe TVVolumeDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeDOWN");
+//Adafruit_MQTT_Subscribe TVMUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVMUTE");
+//Adafruit_MQTT_Subscribe PetFeeder = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/PetFeeder"); //servo
+Adafruit_MQTT_Subscribe TVPOWER_MUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPOWER_MUTE");
+Adafruit_MQTT_Subscribe TVUPVolume_Channel = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVUPVolume_Channel");
+Adafruit_MQTT_Subscribe TVDOWNVolume_Channel = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVDOWNVolume_Channel");
 
 //NOTE TO SELF: TRY TO REPLACE THE VOLUME AND CHANNEL UPDOWN WITH A SLIDER USING PROTOCOLS IN FOLDER
 //IN and PUBLISHING feed arrays
 //#define numSubscriptions 8
-Adafruit_MQTT_Subscribe inArray[8] = {LED0, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE };
+Adafruit_MQTT_Subscribe inArray[8] = {Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel };
 /*************************** Hardware shit ************************************/
 /*
  * 
@@ -157,24 +162,20 @@ void refreshData(){
 }//refreshData
 
 void sendData() {
-  //LEDToggle, LED2 , TVPower, TVChannelUP , TVChannelDOWN , TVVolumeUP , TVVolumeDOWN , TVMUTE
+  //Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel 
    Wire.beginTransmission(8);
    //LEDs
-   sendByByte(*LED0.lastread == '1' ? "l0h":"l0l");//LED 0 high/low
-   //INSERT AN LED1
-   sendByByte(*LED2.lastread == '1' ? "l2h":"l2l" ); //led 2 high/low
-   //TVs
-   sendByByte(*TVPower.lastread == '1' ? "t0p":""); //tv 0 power
-   sendByByte(*TVChannelUP.lastread == '1' ? "t0c":""); //tv 0 channelUp
-   sendByByte(*TVChannelDOWN.lastread == '1' ? "t0b":""); //tv 0 channelDown
-   sendByByte(*TVVolumeUP.lastread == '1' ? "t0v":""); //tv 0 volumeUp
-   sendByByte(*TVVolumeDOWN.lastread == '1' ? "t0u":""); //tv 0 volumeDown
-   sendByByte(*TVMUTE.lastread == '1' ? "t0m":""); //tv 0 mute
-   //servo
-   sendByByte(*TVMUTE.lastread == '1' ? "t0m":""); //tv 0 mute
+
+   sendByByte(*LED0_1.lastread == '1' ? "l0h":"l0l");//LED 0 high/low
+   
+   sendByByte(*TVPOWER_MUTE.lastread == '1' ? "t0p":""); //tv 0 power
+   sendByByte(*TVUPVolume_Channel.lastread == '1' ? "t0c":""); //tv 0 channelUp
+   sendByByte(*TVDOWNVolume_Channel.lastread == '1' ? "t0v":""); //tv 0 volumeUp
+   
    Wire.write('s'); Wire.write('0'); Wire.write(*PetFeeder.lastread);//lastread will be a 0 to 180 value
+
    
    Wire.endTransmission(); 
-  }//
+  }//sendData
 
 void sendByByte(String s){if(s[0]!='\0') for(int i=0;i<s.length();i++){Wire.write((char) s[i]);};}
