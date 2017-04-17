@@ -73,8 +73,10 @@ Adafruit_MQTT_Subscribe TVDOWNVolume_Channel = Adafruit_MQTT_Subscribe(&mqtt, AI
 //NOTE TO SELF: TRY TO REPLACE THE VOLUME AND CHANNEL UPDOWN WITH A SLIDER USING PROTOCOLS IN FOLDER
 //IN and PUBLISHING feed arrays
 //#define numSubscriptions 8
-Adafruit_MQTT_Subscribe inArray[8] = {Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel };
+Adafruit_MQTT_Subscribe inArray[5] = {Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel };
 /*************************** Hardware shit ************************************/
+ //we are not doing much hardware here because we do it on the other board
+
 /*
  * 
      struct light{
@@ -163,16 +165,17 @@ void refreshData(){
 
 void sendData() {
   //Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel 
+  int switcher = Switcher.lastread;
    Wire.beginTransmission(8);
    //LEDs
 
-   sendByByte(*LED0_1.lastread == '1' ? "l0h":"l0l");//LED 0 high/low
-   
-   sendByByte(*TVPOWER_MUTE.lastread == '1' ? "t0p":""); //tv 0 power
-   sendByByte(*TVUPVolume_Channel.lastread == '1' ? "t0c":""); //tv 0 channelUp
-   sendByByte(*TVDOWNVolume_Channel.lastread == '1' ? "t0v":""); //tv 0 volumeUp
-   
-   Wire.write('s'); Wire.write('0'); Wire.write(*PetFeeder.lastread);//lastread will be a 0 to 180 value
+   sendByByte(*LED0_1.lastread == '1' ? (switcher==0? "l0h":"l1h") : (switcher==0? "l0l" : "l1l" ) );//if(ON){if(switch==0){light0on}else{light1on}}else if(switch==0)l0off else l1 off
+   //if I have enough memory, I might want to lay out the commands on an array, where lastread does the primary element selector and switcher the secondary
+   sendByByte(*TVPOWER_MUTE.lastread == '1' ? (switcher==0? "t0p":"t0m") : "" ); //tv 0 power/mute. if lastread is not one don't send anything at all
+   sendByByte(*TVUPVolume_Channel.lastread == '1' ? (switcher==0? "t0v":"t0c") : "" ); //tv 0. if switch 0, volume up. if switch 1 channel up. if last 0, do nothing
+   sendByByte(*TVDOWNVolume_Channel.lastread == '1' ? (switcher==0? "t0u":"t0b") : "" ); //tv 0. if switch 0, volume down. if switch 1 channel down. if last 0, do nothing
+   //lastread will be a 0 to 180 value. -180??? must be char or it will fuck up the parcel recieve algorithm
+   Wire.write('s'); Wire.write('0'); Wire.write( (char) *PetFeeder.lastread);
 
    
    Wire.endTransmission(); 
