@@ -3,7 +3,7 @@
 #include <Servo.h>
 
 #include <boarddefs.h>
-#include <ir_Lego_PF_BitStreamEncoder.h>
+//#include <ir_Lego_PF_BitStreamEncoder.h>
 #include <IRremote.h>
 #include <IRremoteInt.h>
 
@@ -15,6 +15,7 @@
 struct parcel{
   char command[3] = {'0','0','0'}; // chars: {component , adressNumber , action}
 };
+boolean switcher = 0;
 /* COMMAND KEY
 Component: 'l' for light, 's' for servo, 'r' for ir, 
 AdressNumber: different for each component OF THE SAME TYPE. So, every LED has a different adress
@@ -26,7 +27,7 @@ KEY */
 /*************************** Hardware shit ************************************/
 int lights[3] = {2,5,6};//pins. Position in array is the light's number, starting with light 0
 //consider slider for lights so that they can be dimmed
-Servo lock,feeder;
+Servo lock ,feeder;
 Servo servos[2] = {lock,feeder};
 
 IRsend irSend; // irSend.sendSony(code,numberOfBits). The hex codes are in a txt file in this folder, and the #ofBits is the number of hex digits times 4
@@ -38,8 +39,8 @@ void setup()
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onReceive(receiveEvent); // register event
   Serial.begin(9600);
-  for(int i=0; i < sizeof(lights)/sizeof(int)) {pinMode(lights[i], OUTPUT); Serial.println("LED INITIALIZED");}
-  for(int i=0; i < sizeof(servos)/sizeof(Servo)) {servos[i].attach(i+7); Serial.println("SERVO INITIALIZED");} //SERVOS WILL BE ON PINS 7,8,9, etc.
+  for(int i=0; i < sizeof(lights)/sizeof(int);i++) {pinMode(lights[i], OUTPUT); Serial.println("LED INITIALIZED");}
+  for(int i=0; i < sizeof(servos)/sizeof(Servo);i++) {servos[i].attach(i+7); Serial.println("SERVO INITIALIZED");} //SERVOS WILL BE ON PINS 7,8,9, etc.
 }
 
 void loop()
@@ -68,9 +69,12 @@ for(int i=0;i<3;i++)
 
 void execute(struct parcel p)
 {
- 
+ Serial.print("Executing parcel: "); Serial.print(p.command[0] + p.command[1]+p.command[2]);
   switch(p.command[0])//switch for component type
    {
+     case 'w' ://switcher
+                switcher = p.command[2] == '0'? false:true;
+                break;//no use analyzing further, move to next parcel
      case 'l' ://light
                 digitalWrite(lights[p.command[1]], (p.command[2] == 'h')? HIGH:LOW); 
                 break;//light. writes to lights[adress#] high if command[2] is 'h'.
@@ -78,7 +82,7 @@ void execute(struct parcel p)
                 switch(p.command[2])
                       {
                         case 'p': for(int i=0 ; i<3; i++){irSend.sendSony(0xA90,12); delay(40);}; break; //power
-                        case 'c': for(int i=0 ; i<3; i++) {irSend.sendSony(0x90,8); delay(40);}; break //channel up
+                        case 'c': for(int i=0 ; i<3; i++) {irSend.sendSony(0x90,8); delay(40);}; break; //channel up
                         case 'b': for(int i=0 ; i<3; i++) {irSend.sendSony(0x890,12); delay(40);}; break; //channel down
                         case 'v': for(int i=0 ; i<3; i++) {irSend.sendSony(0x490,12); delay(40);}; break; //volume up
                         case 'u': for(int i=0 ; i<3; i++) {irSend.sendSony(0xC90,12); delay(40);};break; //volume down
