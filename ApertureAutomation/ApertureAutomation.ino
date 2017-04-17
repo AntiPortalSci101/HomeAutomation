@@ -56,7 +56,7 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 
 // Subscribing to changes for command feeds
 Adafruit_MQTT_Subscribe Switcher = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/Switcher");
-
+//*********LEDS***********//
 Adafruit_MQTT_Subscribe LED0_1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED0_1");
 //Adafruit_MQTT_Subscribe LED2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED2");
 //Adafruit_MQTT_Subscribe TVPower = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPower");
@@ -66,10 +66,12 @@ Adafruit_MQTT_Subscribe LED0_1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f
 //Adafruit_MQTT_Subscribe TVVolumeDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVVolumeDOWN");
 //Adafruit_MQTT_Subscribe TVMUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVMUTE");
 //Adafruit_MQTT_Subscribe PetFeeder = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/PetFeeder"); //servo
+//**********TVs***************//
 Adafruit_MQTT_Subscribe TVPOWER_MUTE = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPOWER_MUTE");
 Adafruit_MQTT_Subscribe TVUPVolume_Channel = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVUPVolume_Channel");
 Adafruit_MQTT_Subscribe TVDOWNVolume_Channel = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVDOWNVolume_Channel");
-
+//SERVOS
+Adafruit_MQTT_Subscribe PetFeeder = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/PetFeeder");
 //NOTE TO SELF: TRY TO REPLACE THE VOLUME AND CHANNEL UPDOWN WITH A SLIDER USING PROTOCOLS IN FOLDER
 //IN and PUBLISHING feed arrays
 //#define numSubscriptions 8
@@ -165,7 +167,7 @@ void refreshData(){
 
 void sendData() {
   //Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel 
-  int switcher = Switcher.lastread;
+   int switcher = *Switcher.lastread; //implicit cast
    Wire.beginTransmission(8);
    //LEDs
 
@@ -175,8 +177,8 @@ void sendData() {
    sendByByte(*TVUPVolume_Channel.lastread == '1' ? (switcher==0? "t0v":"t0c") : "" ); //tv 0. if switch 0, volume up. if switch 1 channel up. if last 0, do nothing
    sendByByte(*TVDOWNVolume_Channel.lastread == '1' ? (switcher==0? "t0u":"t0b") : "" ); //tv 0. if switch 0, volume down. if switch 1 channel down. if last 0, do nothing
    //lastread will be a 0 to 180 value. -180??? must be char or it will fuck up the parcel recieve algorithm
-   Wire.write('s'); Wire.write('0'); Wire.write( (char) *PetFeeder.lastread);
-
+   //Wire.write('s'); Wire.write('0'); Wire.write(*PetFeeder.lastread); //I've changed my mind, this will be a momentary button that triggers a feeding action
+   sendByByte(*PetFeeder.lastread == '1'? "spf":"spb");//servo petFeeder forward (90) else servo petfeeder backwards(0)
    
    Wire.endTransmission(); 
   }//sendData
