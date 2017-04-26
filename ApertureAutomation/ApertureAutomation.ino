@@ -58,7 +58,7 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 Adafruit_MQTT_Subscribe Switcher = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/Switcher");
 //*********LEDS***********//
 Adafruit_MQTT_Subscribe LED0_1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED0_1");
-//Adafruit_MQTT_Subscribe LED2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED2");
+//Adafruit_MQTT_Subscribe LED2_3 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LED2");
 //Adafruit_MQTT_Subscribe TVPower = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVPower");
 //Adafruit_MQTT_Subscribe TVChannelUP = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelUP");
 //Adafruit_MQTT_Subscribe TVChannelDOWN = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/TVChannelDOWN");
