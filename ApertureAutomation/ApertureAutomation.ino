@@ -80,7 +80,7 @@ Adafruit_MQTT_Subscribe inArray[5] = {Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume
  //we are not doing much hardware here because we do it on the other board
 
 /*
- * 
+ *
      struct light{
       Adafruit_MQTT_Subscribe feed;
       int pin;
@@ -99,9 +99,9 @@ void setup() {
   Serial.print(F("\nInit the Client..."));
   if(Ethernet.begin(mac) == 0) Serial.print(F("Failed, have to use ip"));
   //under the if: Ethernet.begin(mac, iotIP);
-  
+
   delay(1000); //give the ethernet a second to initialize
-  
+
 //SET UP SUBSCRIPTIONS TO READ FEEDS
   for(int i=0; i<(sizeof(inArray)/sizeof(Adafruit_MQTT_Subscribe)); i++) mqtt.subscribe(&inArray[i]);//the i terminator should match num of in feeds
 
@@ -117,7 +117,10 @@ void loop() {//do we need "io.run()"? not sure, see servo skectch, but if it ain
   // function definition further below.
   MQTT_connect();
 //CONSIDER USING EVENT HANDLERS AS OUTLINED IN "adafrutio_16_servo.ino" example instead of the hodgepoge below
- for(int i=0;i<(sizeof(inArray)/sizeof(Adafruit_MQTT_Subscribe)); i++) {refreshData(); Serial.print("Feed "+i); Serial.println((char*)inArray[i].lastread);}//look for packets on all subscription feeds
+ //for(int i=0;i<(sizeof(inArray)/sizeof(Adafruit_MQTT_Subscribe)); i++) {
+   refreshData(); Serial.print("Feed "+i);
+   Serial.println((char*)inArray[i].lastread);
+ //}//look for packets on all subscription feeds
   sendData();//this is where everything happens
 
   // ping the server to keep the mqtt connection alive
@@ -150,9 +153,9 @@ void MQTT_connect() {
 
 //GET DATA FROM ALL FEED AND PUT THEM INTO THE 'lastread' vals of the suscription objects
  // this is our 'wait for incoming subscription packets' busy subloop
-void refreshData(){ 
+void refreshData(){
   //Adafruit_MQTT_Subscribe *subscription;
-   // subscription = 
+   // subscription =
    int i=0;
    while( (mqtt.readSubscription(1000) != '\0') && i<100) {i++;}
    //if it never returns null for some reason it will stop after 100 reps
@@ -166,7 +169,7 @@ void refreshData(){
 }//refreshData
 
 void sendData() {
-  //Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel 
+  //Switcher, LED0_1, TVPOWER_MUTE ,TVUPVolume_Channel,TVDOWNVolume_Channel
    int switcher = *Switcher.lastread; //implicit cast
    Wire.beginTransmission(8);
    //LEDs
@@ -179,8 +182,8 @@ void sendData() {
    //lastread will be a 0 to 180 value. -180??? must be char or it will fuck up the parcel recieve algorithm
    //Wire.write('s'); Wire.write('0'); Wire.write(*PetFeeder.lastread); //I've changed my mind, this will be a momentary button that triggers a feeding action
    sendByByte(*PetFeeder.lastread == '1'? "spf":"spb");//servo petFeeder forward (90) else servo petfeeder backwards(0)
-   
-   Wire.endTransmission(); 
+
+   Wire.endTransmission();
   }//sendData
 
 void sendByByte(String s){if(s[0]!='\0') for(int i=0;i<s.length();i++){Wire.write((char) s[i]);};}
