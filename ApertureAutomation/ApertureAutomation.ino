@@ -1,22 +1,30 @@
 // pin used to control the servo
-#define SERVO_PIN 2
+#define FEEDER_PIN 2
 
 // create an instance of the servo class
-Servo servo;
+Servo feeder;
 
-// set up the 'servo' feed
-AdafruitIO_Feed *servo_feed = io.feed("servo");
-
+// FEED DECLARATION
+AdafruitIO_Feed *PetFeeder = io.feed("PetFeeder");
+AdafruitIO_Feed *Switcher = io.feed("Switcher");
+AdafruitIO_Feed *LED0_1 = io.feed("LED0_1");
+//AdafruitIO_Feed *LED2_3 = io.feed("LED2_3");
+AdafruitIO_Feed *TVP_M = io.feed("TVPOWER_MUTE");
+AdafruitIO_Feed *TVUP = io.feed("TVUPVolume_Channel");
+AdafruitIO_Feed *TVDOWN = io.feed("TVDOWNVolume_Channel");
+//FEED DECLARATION
+//************HARDWARE PIN DECLARATION below*****************//
+int lights[] = 
 void setup() {
 
   // start the serial connection
-  Serial.begin(115200);
+  Serial.begin(9600); //what the fuck is 115200???
 
   // wait for serial monitor to open
   while(! Serial);
 
   // tell the servo class which pin we are using
-  servo.attach(SERVO_PIN);
+  feeder.attach(FEEDER_PIN);
 
   // connect to io.adafruit.com
   Serial.print("Connecting to Adafruit IO");
