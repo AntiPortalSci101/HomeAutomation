@@ -19,6 +19,8 @@ AdafruitIO_Feed *Switcher = io.feed("Switcher");
 //AdafruitIO_Feed *TVDOWN = io.feed("TVDOWNVolume_Channel");
 //FEED DECLARATION
 //************STRUCT "Feed" definition below*****************//
+int switcher = 0;
+
 struct feed{
   AdafruitIO_Feed *feed;
   feed->onMessage(eventHandler);
@@ -84,6 +86,7 @@ void loop() {
   // function. it keeps the client connected to
   // io.adafruit.com, and processes any incoming data.
   io.run();
+  delay(10);
 }
 
 // this function is called whenever a 'servo' message
@@ -103,10 +106,10 @@ servo.write(angle);
 }*/
 void switcherHandler(AdafrutIO_Data *data)
 {
-
+  switcher = data->toInt();
 }
 
-void handler(AdafrutIO_Data *datum)
+void handler(AdafrutIO_Data *data)
 {
-
+ 
 }
