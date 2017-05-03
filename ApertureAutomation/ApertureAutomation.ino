@@ -5,16 +5,27 @@
 Servo feeder;
 
 // FEED DECLARATION
-AdafruitIO_Feed *PetFeeder = io.feed("PetFeeder");
-AdafruitIO_Feed *Switcher = io.feed("Switcher");
-AdafruitIO_Feed *LED0_1 = io.feed("LED0_1");
+//AdafruitIO_Feed *PetFeeder = io.feed("PetFeeder");
+//AdafruitIO_Feed *Switcher = io.feed("Switcher");
+//AdafruitIO_Feed *LED0_1 = io.feed("LED0_1");
 //AdafruitIO_Feed *LED2_3 = io.feed("LED2_3");
-AdafruitIO_Feed *TVP_M = io.feed("TVPOWER_MUTE");
-AdafruitIO_Feed *TVUP = io.feed("TVUPVolume_Channel");
-AdafruitIO_Feed *TVDOWN = io.feed("TVDOWNVolume_Channel");
+//AdafruitIO_Feed *TVP_M = io.feed("TVPOWER_MUTE");
+//AdafruitIO_Feed *TVUP = io.feed("TVUPVolume_Channel");
+//AdafruitIO_Feed *TVDOWN = io.feed("TVDOWNVolume_Channel");
 //FEED DECLARATION
 //************STRUCT "Feed" definition below*****************//
-struct feed
+struct feed{
+  AdafruitIO_Feed *feed;
+  char[2] sig; //the sig is sent first to identify the component
+  int data;
+}
+PetFeeder = {.feed = io.feed("PetFeeder"), .sig = {'s','p'} },
+Switcher = {.feed = io.feed("Switcher"), .sig={'',''} },
+LED0_1 = {.feed = io.feed("LED0_1"), .sig={'',''} },
+TVP_M = {.feed = io.feed("TVPOWER_MUTE"), .sig={'',''} },
+TVUP = {.feed = io.feed("TVUPVolume_Channel"), .sig={'',''} },
+TVDOWN = {.feed = io.feed("TVDOWNVolume_Channel"), .sig={'',''} },
+;//Immediate feed declaration
 
 //Struct "Feed"//
 void setup() {
