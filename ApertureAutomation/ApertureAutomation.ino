@@ -108,5 +108,5 @@ void switcherHandler(AdafrutIO_Data *data)
 
 void handler(AdafrutIO_Data *datum)
 {
-  
+
 }
