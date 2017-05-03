@@ -1,3 +1,8 @@
+#include <Adafruit_IO_Arduino.h>
+
+#include <Adafruit_IO_Client.h>
+#include <Adafruit_IO_FONA.h>
+
 // pin used to control the servo
 #define FEEDER_PIN 2
 
@@ -6,7 +11,7 @@ Servo feeder;
 
 // FEED DECLARATION
 //AdafruitIO_Feed *PetFeeder = io.feed("PetFeeder");
-//AdafruitIO_Feed *Switcher = io.feed("Switcher");
+AdafruitIO_Feed *Switcher = io.feed("Switcher");
 //AdafruitIO_Feed *LED0_1 = io.feed("LED0_1");
 //AdafruitIO_Feed *LED2_3 = io.feed("LED2_3");
 //AdafruitIO_Feed *TVP_M = io.feed("TVPOWER_MUTE");
@@ -16,15 +21,17 @@ Servo feeder;
 //************STRUCT "Feed" definition below*****************//
 struct feed{
   AdafruitIO_Feed *feed;
-  char[2] sig; //the sig is sent first to identify the component
-  int data;
+  feed->onMessage(eventHandler);
+  //char[2] sig; //the sig is sent first to identify the component
+  char sig;//the second char is controlled by switcher, and the final is state
+  //int data;
 }
-PetFeeder = {.feed = io.feed("PetFeeder"), .sig = {'s','p'} },
-Switcher = {.feed = io.feed("Switcher"), .sig={'',''} },
-LED0_1 = {.feed = io.feed("LED0_1"), .sig={'',''} },
-TVP_M = {.feed = io.feed("TVPOWER_MUTE"), .sig={'',''} },
-TVUP = {.feed = io.feed("TVUPVolume_Channel"), .sig={'',''} },
-TVDOWN = {.feed = io.feed("TVDOWNVolume_Channel"), .sig={'',''} },
+PetFeeder = {.feed = io.feed("PetFeeder"), .sig = 's'},//{'s','p'} },
+//Switcher = {.feed = io.feed("Switcher"), .sig = 'w'}//.sig={'',''} },
+LED0_1 = {.feed = io.feed("LED0_1"), .sig = l},//.sig={'',''} },
+TVP_M = {.feed = io.feed("TVPOWER_MUTE"), .sig = 'p'}  //.sig={'',''} },
+TVUP = {.feed = io.feed("TVUPVolume_Channel"), .sig = 'u'}//.sig={'',''} },
+TVDOWN = {.feed = io.feed("TVDOWNVolume_Channel"), .sig = 'd'}//.sig={'',''} },
 ;//Immediate feed declaration
 
 //Struct "Feed"//
@@ -47,12 +54,13 @@ void setup() {
   // the handleMessage function (defined below)
   // will be called whenever a message is
   // received from adafruit io.
-  PetFeeder->onMessage(PetFeederHandler);
+  Switcher->onMessage(switcherHandler);
+/*  PetFeeder->onMessage(PetFeederHandler);
   Switcher->onMessage(SwitcherHandler);
   LED0_1->onMessage(LED0_1Handler);
   TVP_M->onMessage(TVP_MHandler);
   TVUP->onMessage(TVUPHandler);
-  TVDOWN->onMessage(TVDOWNHandler);
+  TVDOWN->onMessage(TVDOWNHandler);*/
 
   //CONSIDER MAKING STRUCT "FEED" WHICH CONTAINS POINTER TO OBJECT
   //AS WELL AS THE HANDLER FUNCTION AND THE APPROPRIATE COMMANDS.
@@ -81,11 +89,9 @@ void loop() {
 // this function is called whenever a 'servo' message
 // is received from Adafruit IO. it was attached to
 // the servo feed in the setup() function above.
-void PetFeederHandler(AdafruitIO_Data *data) {
-
+/*void PetFeederHandler(AdafruitIO_Data *data) {
 // convert the data to integer
 int angle = data->toInt();
-
 // make sure we don't exceed the limit
 // of the servo. the range is from 0
 // to 180.
@@ -93,7 +99,14 @@ if(angle < 0)
 angle = 0;
 else if(angle > 180)
 angle = 180;
-
 servo.write(angle);
+}*/
+void switcherHandler(AdafrutIO_Data *data)
+{
 
+}
+
+void handler(AdafrutIO_Data *datum)
+{
+  
 }
