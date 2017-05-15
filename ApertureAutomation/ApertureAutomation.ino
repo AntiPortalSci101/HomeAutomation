@@ -1,13 +1,45 @@
-#include <Adafruit_IO_Arduino.h>
+#include <Dhcp.h>
+#include <Dns.h>
+#include <Ethernet.h>
+#include <EthernetClient.h>
+#include <EthernetServer.h>
 
-#include <Adafruit_IO_Client.h>
-#include <Adafruit_IO_FONA.h>
+#include <SPI.h>
+
+#include <ArduinoHttpClient.h>
+#include <b64.h>
+#include <HttpClient.h>
+#include <WebSocketClient.h>
+
+#include <Adafruit_MQTT.h>
+#include <Adafruit_MQTT_Client.h>
+
+#include <AdafruitIO.h>
+#include <AdafruitIO_Dashboard.h>
+#include <AdafruitIO_Data.h>
+#include <AdafruitIO_Definitions.h>
+#include <AdafruitIO_Ethernet.h>
+#include <AdafruitIO_Feed.h>
+
+#include <AdafruitIO_Group.h>
+
+
+#include <Servo.h>
+
+//#include <Ethernet2.h>
+
 
 // pin used to control the servo
 #define FEEDER_PIN 2
 
 // create an instance of the servo class
 Servo feeder;
+
+#define IO_USERNAME    "your_username"
+#define IO_KEY         "your_key"
+
+AdafruitIO_Ethernet io(IO_USERNAME, IO_KEY);
+
 
 // FEED DECLARATION
 //AdafruitIO_Feed *PetFeeder = io.feed("PetFeeder");
@@ -19,8 +51,8 @@ AdafruitIO_Feed *Switcher = io.feed("Switcher");
 //AdafruitIO_Feed *TVDOWN = io.feed("TVDOWNVolume_Channel");
 //FEED DECLARATION
 //************STRUCT "Feed" definition below*****************//
-int switcher = 0;
-
+int switcherState = 0;
+  
 struct feed{
   AdafruitIO_Feed *feed;
   feed->onMessage(eventHandler);
@@ -30,9 +62,9 @@ struct feed{
 }
 PetFeeder = {.feed = io.feed("PetFeeder"), .sig = 's'},//{'s','p'} },
 //Switcher = {.feed = io.feed("Switcher"), .sig = 'w'}//.sig={'',''} },
-LED0_1 = {.feed = io.feed("LED0_1"), .sig = l},//.sig={'',''} },
-TVP_M = {.feed = io.feed("TVPOWER_MUTE"), .sig = 'p'}  //.sig={'',''} },
-TVUP = {.feed = io.feed("TVUPVolume_Channel"), .sig = 'u'}//.sig={'',''} },
+LED0_1 = {.feed = io.feed("LED0_1"), .sig = 'l'},//.sig={'',''} },
+TVP_M = {.feed = io.feed("TVPOWER_MUTE"), .sig = 'p'},  //.sig={'',''} },
+TVUP = {.feed = io.feed("TVUPVolume_Channel"), .sig = 'u'},//.sig={'',''} },
 TVDOWN = {.feed = io.feed("TVDOWNVolume_Channel"), .sig = 'd'}//.sig={'',''} },
 ;//Immediate feed declaration
 
@@ -109,7 +141,7 @@ void switcherHandler(AdafrutIO_Data *data)
   switcher = data->toInt();
 }
 
-void handler(AdafrutIO_Data *data)
+void eventHandler(AdafrutIO_Data *data)
 {
  
 }
